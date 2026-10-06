@@ -25,7 +25,16 @@ export default async function ProductListPage() {
           {products.map((product) => (
             <li key={product.id} className={styles.product}>
               <div className={styles.image}>
-                <span>{product.type.toUpperCase()}</span>
+                {product.image ? (
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                  />
+                ) : (
+                  <span>{product.type.toUpperCase()}</span>
+                )}
               </div>
 
               <div className={styles.info}>
