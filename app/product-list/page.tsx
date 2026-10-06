@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { getProducts } from "@/lib/repository";
+import styles from "./page.module.css";
 
 export default async function ProductListPage() {
   const products = await getProducts({
@@ -6,22 +8,57 @@ export default async function ProductListPage() {
   });
 
   return (
-    <main>
-      <h1>Katalog produktów</h1>
-
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <div>
+          <p className={styles.eyebrow}>PRODUKTY</p>
+          <h1>Katalog produktów</h1>
+        </div>
+        <p className={styles.count}>
+          {products.length} {products.length === 1 ? "produkt" : "produktów"}
+        </p>
+      </header>
       {products.length === 0 ? (
-        <p>Brak produktów do wyświetlenia.</p>
+        <p className={styles.empty}>Brak produktów do wyświetlenia.</p>
       ) : (
-        <ul>
+        <ul className={styles.products}>
           {products.map((product) => (
-            <li key={product.id}>
-              <h2>{product.name}</h2>
+            <li key={product.id} className={styles.product}>
+              <div className={styles.image}>
+                <span>{product.type.toUpperCase()}</span>
+              </div>
 
-              <p>Kategoria: {product.type}</p>
+              <div className={styles.info}>
+                <div className={styles.category}>
+                  {product.type.toUpperCase()}
+                </div>
 
-              <p>Cena: {(product.price / 100).toFixed(2)} zł</p>
+                <h2>{product.name}</h2>
 
-              <p>{product.amount > 0 ? "Dostępny" : "Niedostępny"}</p>
+                <p className={styles.description}>{product.description}</p>
+
+                <div className={styles.bottom}>
+                  <div>
+                    <p className={styles.price}>
+                      {(product.price / 100).toFixed(2)} zł
+                    </p>
+
+                    <p
+                      className={
+                        product.amount > 0
+                          ? styles.available
+                          : styles.unavailable
+                      }
+                    >
+                      {product.amount > 0
+                        ? `Dostępny (${product.amount} szt.)`
+                        : "Niedostępny"}
+                    </p>
+                  </div>
+
+                  <span className={styles.arrow}>→</span>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
