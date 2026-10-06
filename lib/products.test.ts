@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import productsJson from "@/data/products.json";
+import productsJson from "../data/products.json";
 
 import {
   validateProducts,
