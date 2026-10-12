@@ -1,14 +1,13 @@
 import Image from "next/image";
-import styles from "../page.module.css";
 import Link from "next/link";
 import NavLink from "./nav-link";
 
 export default function MainHeader() {
   return (
-    <nav className={styles.navigation}>
-      <Link href="/">
+    <nav className="flex flex-wrap items-center gap-6 px-8 py-6 text-sm">
+      <Link href="/" className="shrink-0">
         <Image
-          className={styles.logo}
+          className="h-auto w-[100px]"
           src="/pk.png"
           alt="PK logo"
           width={100}
@@ -16,6 +15,7 @@ export default function MainHeader() {
           priority
         />
       </Link>
+
       <NavLink href="/">Sklep</NavLink>
       <NavLink href="/product-list">Produkty</NavLink>
       <NavLink href="/basket">Koszyk</NavLink>

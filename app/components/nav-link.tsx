@@ -11,8 +11,16 @@ export default function NavLink({
   children: React.ReactNode;
 }) {
   const path = usePathname();
+
+  const isActive = href === "/" ? path === "/" : path.startsWith(href);
+
   return (
-    <Link href={href} className={path.startsWith(href) ? "active" : undefined}>
+    <Link
+      href={href}
+      className={`transition-colors duration-200 hover:text-blue-600 ${
+        isActive ? "font-semibold text-blue-600" : "text-gray-700"
+      }`}
+    >
       {children}
     </Link>
   );
