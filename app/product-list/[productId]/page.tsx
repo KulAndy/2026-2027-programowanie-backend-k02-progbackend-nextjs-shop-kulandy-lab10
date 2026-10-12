@@ -5,7 +5,7 @@ import styles from "../page.module.css";
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import type { Product } from "@/lib/products";
-import NotFound from "@/app/not-found";
+import { notFound } from "next/navigation";
 
 export default function ProductPage({
   params,
@@ -40,7 +40,7 @@ export default function ProductPage({
   }
 
   if (!product) {
-    return <NotFound />;
+    notFound();
   }
 
   return (
