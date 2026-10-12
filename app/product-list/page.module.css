@@ -171,3 +171,20 @@
     height: 220px;
   }
 }
+
+.filters {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.productLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.productLink:hover h2 {
+  text-decoration: underline;
+}
