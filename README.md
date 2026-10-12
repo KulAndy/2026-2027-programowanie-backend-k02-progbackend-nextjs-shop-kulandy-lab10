@@ -1,5 +1,6 @@
-# aplickaja na laby
+# NextJS Labs of BackEnd Programming
 
-## komendy
+## Lab 10
 
-patrz `package.json` - `scripts`
+The aim of the lab is to prepare the environment for creating a fullstack Next.js application, learn the basics of this framework and
+become familiar with handling subpages (routes).
