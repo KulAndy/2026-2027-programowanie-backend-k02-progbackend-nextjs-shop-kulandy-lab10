@@ -1,24 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Product } from "@/lib/products";
+import type { Product, ProductType } from "@/lib/products";
+import { getProducts } from "@/lib/repository";
 
-export default function ProductCatalog({ products }: { products: Product[] }) {
+const types: ProductType[] = ["cpu", "gpu", "ram", "disk"];
+
+export default function ProductCatalog({
+  category,
+}: {
+  category?: ProductType;
+}) {
   const [sort, setSort] = useState<"name" | "date">("name");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const visible = [...products]
-    .filter((product) => !onlyAvailable || product.amount > 0)
-    .sort((a, b) =>
-      sort === "name"
-        ? a.name.localeCompare(b.name, "pl")
-        : b.date.localeCompare(a.date),
-    );
+  useEffect(() => {
+    getProducts({
+      sort,
+      availability: onlyAvailable ? "available" : "all",
+      type: category,
+    }).then((data) => {
+      setProducts(data);
+    });
+  }, [category, onlyAvailable, sort]);
 
   return (
     <>
+      <nav aria-label="Kategorie" className="mb-8 flex flex-wrap gap-3">
+        {types.map((type) => (
+          <Link
+            key={type}
+            href={`/product-list/${type}`}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold uppercase tracking-wider text-gray-700 transition hover:border-blue-500 hover:text-blue-600"
+          >
+            {type}
+          </Link>
+        ))}
+      </nav>
+
       <section
         aria-label="Filtrowanie produktów"
         className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4"
@@ -46,17 +68,17 @@ export default function ProductCatalog({ products }: { products: Product[] }) {
         </label>
 
         <p className="w-full text-sm text-gray-500 sm:w-auto">
-          Wyświetlono: {visible.length} z {products.length}
+          Wyświetlono: {products.length}
         </p>
       </section>
 
-      {visible.length === 0 ? (
+      {products.length === 0 ? (
         <p className="rounded-xl border border-dashed border-gray-300 py-16 text-center text-gray-500">
           Brak produktów do wyświetlenia.
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((product) => (
+          {products.map((product) => (
             <li
               key={product.id}
               className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg"

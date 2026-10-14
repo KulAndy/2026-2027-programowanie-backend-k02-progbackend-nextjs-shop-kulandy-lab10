@@ -1,28 +1,14 @@
 import Image from "next/image";
-import { notFound } from "next/navigation";
-import { getProduct } from "@/lib/repository";
+import Link from "next/link";
+import type { Product } from "@/lib/products";
 
-export default async function ProductPage({
-  params,
-}: {
-  params: Promise<{ productId: string }>;
-}) {
-  const { productId } = await params;
-  const id = Number(productId);
-
-  if (!Number.isInteger(id) || id <= 0) {
-    notFound();
-  }
-
-  const product = await getProduct(id);
-
-  if (!product) {
-    notFound();
-  }
-
+export default function ProductDetails({ product }: { product: Product }) {
   return (
     <main className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 px-4 py-10 sm:px-6 md:grid-cols-2 md:items-start lg:gap-12">
-      <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gray-100">
+      <Link
+        href={`/product-list/image/${product.id}`}
+        className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gray-100"
+      >
         {product.image ? (
           <Image
             src={product.image}
@@ -37,7 +23,7 @@ export default async function ProductPage({
             {product.type.toUpperCase()}
           </span>
         )}
-      </div>
+      </Link>
 
       <div className="flex flex-col py-2">
         <div className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
