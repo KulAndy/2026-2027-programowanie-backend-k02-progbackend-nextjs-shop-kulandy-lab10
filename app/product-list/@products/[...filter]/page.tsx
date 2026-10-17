@@ -17,6 +17,10 @@ export default async function ProductsFilterSlot({
 }) {
   const { filter } = await params;
 
+  if (filter && filter[0] === "image") {
+    return null;
+  }
+
   if (filter && filter.length === 2) {
     const id = Number(filter[1]);
     if (!Number.isInteger(id) || id <= 0) notFound();
