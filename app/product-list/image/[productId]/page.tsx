@@ -36,12 +36,6 @@ export default async function ImagePage({
           </span>
         )}
       </div>
-      <Link
-        href={`/product-list/${product.type}/${product.id}`}
-        className="mt-6 text-sm font-semibold text-blue-600 hover:underline"
-      >
-        Wróć do produktu
-      </Link>
     </section>
   );
 }

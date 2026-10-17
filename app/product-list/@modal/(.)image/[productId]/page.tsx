@@ -1,44 +1,38 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getProduct } from "@/lib/repository";
 import ModalBackdrop from "@/app/components/modal-backdrop";
+import { getProduct } from "@/lib/repository";
+import Image from "next/image";
 
-export default async function InterceptedImagePage({
+export default async function ProductModalPage({
   params,
 }: {
   params: Promise<{ productId: string }>;
 }) {
   const { productId } = await params;
-  const id = Number(productId);
+  const product = await getProduct(Number(productId));
 
-  if (!Number.isInteger(id) || id <= 0) notFound();
-  const product = await getProduct(id);
-  if (!product) notFound();
+  if (!product) {
+    notFound();
+  }
 
   return (
-    <>
-      <ModalBackdrop />
-      <dialog
-        open
-        className="fixed left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-2"
-      >
-        <div className="relative h-[60vh] w-[60vw]">
-          {product.image ? (
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              priority
-              sizes="60vw"
-              className="rounded-xl object-contain"
-            />
-          ) : (
-            <span className="text-sm font-semibold tracking-wider text-gray-400">
-              {product.type.toUpperCase()}
-            </span>
-          )}
-        </div>
-      </dialog>
-    </>
+    <ModalBackdrop>
+      <div className="relative mx-auto flex h-[80vh] w-[90vw] max-w-5xl items-center justify-center overflow-hidden rounded-2xl bg-gray-950 sm:h-[85vh]">
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            priority
+            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 90vw, 1024px"
+            className="object-contain"
+          />
+        ) : (
+          <span className="text-sm font-semibold tracking-wider text-gray-400">
+            {product.type.toUpperCase()}
+          </span>
+        )}
+      </div>
+    </ModalBackdrop>
   );
 }

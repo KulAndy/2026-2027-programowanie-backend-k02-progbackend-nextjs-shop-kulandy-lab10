@@ -12,7 +12,7 @@ export default function ProductListLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-screen flex-col">
       {children}
 
       <ProductListMenu products={products} discounts={discounts} />
