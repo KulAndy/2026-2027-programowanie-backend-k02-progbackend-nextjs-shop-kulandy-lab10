@@ -6,20 +6,26 @@ import { usePathname } from "next/navigation";
 export default function NavLink({
   href,
   children,
+  exact = false,
 }: {
   href: string;
   children: React.ReactNode;
+  exact?: boolean;
 }) {
-  const path = usePathname();
-
-  const isActive = href === "/" ? path === "/" : path.startsWith(href);
+  const pathname = usePathname();
+  const active = exact
+    ? pathname === href
+    : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <Link
       href={href}
-      className={`transition-colors duration-200 hover:text-blue-600 ${
-        isActive ? "font-semibold text-blue-600" : "text-gray-700"
-      }`}
+      aria-current={active ? "page" : undefined}
+      className={
+        active
+          ? "font-semibold text-blue-600 underline underline-offset-4"
+          : "text-gray-700 hover:text-blue-600"
+      }
     >
       {children}
     </Link>

@@ -1,5 +1,3 @@
-import ProductListMenu from "./ProductListMenu";
-
 export default function ProductListLayout({
   children,
   products,
@@ -12,11 +10,10 @@ export default function ProductListLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex flex-col">
       {children}
-
-      <ProductListMenu products={products} discounts={discounts} />
-
+      <section aria-label="Produkty">{products}</section>
+      <section aria-label="Promocje">{discounts}</section>
       {modal}
     </div>
   );
