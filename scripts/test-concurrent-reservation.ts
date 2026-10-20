@@ -66,8 +66,6 @@ async function main() {
   }
 
   try {
-    // Każda próba wykonuje atomową aktualizację.
-    // PostgreSQL blokuje wiersz i ponownie sprawdza warunek WHERE.
     const reserve = async () => {
       const result = await pool.query(
         `UPDATE "Product"
@@ -98,7 +96,6 @@ async function main() {
 
     console.log("PASS: exactly one reservation succeeded.");
   } finally {
-    // Sprzątamy wyłącznie specjalny rekord testowy.
     const cleanup = await pool.connect();
 
     try {

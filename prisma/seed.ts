@@ -39,7 +39,6 @@ const DEMO_ORDERS = [
 async function main() {
   const products: Product[] = validateProducts(productsJson);
 
-  // Najpierw walidacja, dopiero potem zapis.
   await prisma.$transaction(async (tx) => {
     for (const category of CATEGORIES) {
       await tx.category.upsert({
@@ -112,8 +111,6 @@ async function main() {
       throw new Error("At least four products are required for demo orders.");
     }
 
-    // Cztery zamówienia, każde z dwiema pozycjami.
-    // Istniejące zamówienia nie są aktualizowane, więc snapshoty są trwałe.
     for (let i = 0; i < DEMO_ORDERS.length; i++) {
       const demoOrder = DEMO_ORDERS[i];
 
