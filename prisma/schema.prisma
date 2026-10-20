@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id       Int       @id
+  code     String    @unique // "cpu" | "gpu" | "ram" | "disk"
+  name     String
+  products Product[]
+}
+
+model Product {
+  id          Int      @id
+  code        String   @unique // 10 uppercase ASCII letters/digits
+  name        String
+  description String   @db.Text
+  image       String // local URL from Lab 06, e.g. "/images/products/xxx.png"
+  price       Int // grosze, 0–2147483647, CHECK >= 0
+  amount      Int // sztuki, 0–2147483647, CHECK >= 0
+  date        DateTime @db.Timestamptz(3) // source UTC date
+  nameSortKey String   @db.Text // computed by the shared Lab 06 function
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([categoryId])
+}
