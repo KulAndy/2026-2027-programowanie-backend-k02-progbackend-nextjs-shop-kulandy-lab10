@@ -10,7 +10,9 @@
     "test": "vitest run",
     "generate": "tsx lib/generate.ts > data/products.json",
     "db:seed": "prisma db seed",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "test:order-snapshot": "tsx scripts/test-order-snapshot.ts",
+    "test:reservation": "tsx scripts/test-concurrent-reservation.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",

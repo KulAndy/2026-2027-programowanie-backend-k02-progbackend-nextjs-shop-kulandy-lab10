@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
@@ -7,25 +8,109 @@ datasource db {
   provider = "postgresql"
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 model Category {
   id       Int       @id
-  code     String    @unique // "cpu" | "gpu" | "ram" | "disk"
+  code     String    @unique
   name     String
   products Product[]
 }
 
 model Product {
-  id          Int      @id
-  code        String   @unique // 10 uppercase ASCII letters/digits
+  id          Int       @id
+  code        String    @unique
   name        String
-  description String   @db.Text
-  image       String // local URL from Lab 06, e.g. "/images/products/xxx.png"
-  price       Int // grosze, 0–2147483647, CHECK >= 0
-  amount      Int // sztuki, 0–2147483647, CHECK >= 0
-  date        DateTime @db.Timestamptz(3) // source UTC date
-  nameSortKey String   @db.Text // computed by the shared Lab 06 function
+  description String    @db.Text
+  image       String
+  price       Int
+  amount      Int
+  date        DateTime  @db.Timestamptz(3)
+  nameSortKey String    @db.Text
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  archivedAt  DateTime? @db.Timestamptz(3)
+
+  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@index([categoryId])
+}
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+
+  cart   Cart?
+  orders Order[]
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId Int
+  quantity  Int
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  userId      String
+  status      OrderStatus @default(PENDING)
+  totalAmount BigInt
+  createdAt   DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime    @updatedAt @db.Timestamptz(3)
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items OrderItem[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  productId   Int
+  productName String
+  productCode String
+  quantity    Int
+  unitPrice   BigInt
+  lineTotal   BigInt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([orderId])
 }
