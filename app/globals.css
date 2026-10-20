@@ -1,3 +1,9 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -33,7 +39,7 @@ a {
   font-size: 14px;
 }
 
-.navigation a:hover {
+a:hover {
   text-decoration: underline;
 }
 
@@ -48,4 +54,8 @@ a {
   font-size: clamp(72px, 15vw, 180px);
   font-weight: 600;
   letter-spacing: -0.08em;
+}
+
+.footer {
+  text-align: center;
 }

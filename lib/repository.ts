@@ -1,5 +1,3 @@
-import "server-only";
-
 import productsJson from "@/data/products.json";
 
 import {
