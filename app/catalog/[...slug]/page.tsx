@@ -19,7 +19,6 @@ export default async function CatalogSlugPage({
 }) {
   const { slug } = await params;
 
-  // /catalog/<kategoria>/<id>
   if (slug.length === 2) {
     const type = asType(slug[0]);
     const id = parseProductId(slug[1]);
@@ -31,7 +30,6 @@ export default async function CatalogSlugPage({
     return <ProductDetails product={product} />;
   }
 
-  // /catalog/<kategoria>
   if (slug.length === 1) {
     const type = asType(slug[0]);
     if (type === null) notFound();

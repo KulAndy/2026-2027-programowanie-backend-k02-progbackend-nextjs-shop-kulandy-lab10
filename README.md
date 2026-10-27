@@ -1,102 +1,118 @@
-# Next.js Labs of BackEnd Programming
+## Lab 08 — PostgreSQL i Prisma ORM
 
-## Lab 07 — Trasy dynamiczne i filtry w Next.js
+### Cel laboratorium
 
-Celem laboratorium jest rozwinięcie sklepu z Lab 06 o szczegóły produktu
-oraz katalog z filtrami i sortowaniem zapisanymi w adresie URL.
+Rozbudowa sklepu z Lab 07 o relacyjną bazę danych PostgreSQL oraz Prisma ORM. Celem jest przechowywanie produktów w bazie danych i wykonywanie operacji odczytu za pośrednictwem Prisma zamiast wcześniejszego repozytorium danych.
 
-Środowisko: Node.js 24 LTS, Next.js 16.3.x, TypeScript, App Router, npm, ESLint.
+### Środowisko
 
-## Trasy
+- Node.js 24 LTS
+- Next.js 16.3.x
+- TypeScript
+- App Router
+- PostgreSQL 17
+- Prisma ORM
+- npm
+- ESLint
+- Docker Compose
 
-| Trasa                             | Opis                                                                          |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| `/product-list`                   | Katalog: filtry i sortowanie z parametrów zapytania (serwerowy odczyt danych) |
-| `/product-list/[id]`              | Szczegóły produktu z walidacją identyfikatora                                 |
-| `/product-list/image/[productId]` | Pełna strona obrazka (po odświeżeniu / bezpośrednim wejściu)                  |
-| `/catalog`, `/catalog/[...slug]`  | Rozszerzenie: kategorie i produkt w ścieżce (Catch-all Segments)              |
+### Baza danych
 
-### Kontrakt URL katalogu
+Projekt wykorzystuje dwie instancje PostgreSQL:
 
-| Parametr | Dozwolone wartości                 | Domyślnie |
-| -------- | ---------------------------------- | --------- |
-| `type`   | `all`, `cpu`, `gpu`, `ram`, `disk` | `all`     |
-| `stock`  | `all`, `available`, `unavailable`  | `all`     |
-| `sort`   | `name`, `newest`                   | `name`    |
+| Usługa          | Baza danych | Port hosta | Przeznaczenie         |
+| --------------- | ----------- | ---------- | --------------------- |
+| `postgres`      | `shop`      | `5432`     | Główna baza aplikacji |
+| `postgres-test` | `shop_test` | `5433`     | Baza do testów        |
 
-Przykładowy adres: `/product-list?type=gpu&stock=available&sort=newest`
+Dane głównej bazy są przechowywane w wolumenie Docker `shopdata`. Baza testowa nie ma skonfigurowanego trwałego wolumenu.
 
-Wszystkie kryteria działają łącznie. Nieznaną, pustą albo powtórzoną wartość
-rozpoznanego parametru zastępuje wartość domyślna, a strona pokazuje komunikat
-o pominięciu błędnego ustawienia (pozostałe poprawne kryteria są zachowane).
-Nieznane nazwy parametrów są ignorowane.
+### Uruchomienie PostgreSQL
 
-### Kontrakt identyfikatora produktu
+Uruchom kontenery:
 
-Identyfikatory: od `1` do `2147483647`, zapisane cyframi dziesiętnymi, bez znaku
-i zer wiodących (`/^[1-9][0-9]*$/` + `Number.isSafeInteger`). Niepoprawny format,
-przekroczenie zakresu oraz nieznany poprawny ID prowadzą do `notFound()`.
-Widok braku produktu zawiera link powrotu do katalogu.
+```bash
+docker compose up -d
+```
 
-### Sortowanie i remisy
+Sprawdź ich stan:
 
-- `name` — klucz nazwy rosnąco (porównanie UTF-8 z Lab 06); remisy: `id` rosnąco
-- `newest` — data malejąco; remisy: `id` rosnąco
+```bash
+docker compose ps
+```
 
-## Granica serwer–klient
+Wyświetl logi:
 
-- Odczyt danych i walidacja parametrów wykonują się na serwerze: strona katalogu
-  i strona szczegółów to komponenty serwerowe korzystające z repozytorium.
-- Klientem pozostają tylko: wyróżnienie aktywnej sekcji (`usePathname`),
-  zamknięcie modala (`router.back()`).
-- Stan katalogu przechowywany jest w URL, nie w `useState` — skopiowany adres,
-  odświeżenie i bezpośrednie wejście odtwarzają ten sam widok.
+```bash
+docker compose logs -f postgres postgres-test
+```
 
-## Rozszerzenia
+Aby całkowicie usunąć kontenery i dane zapisane w wolumenach Compose, a następnie uruchomić środowisko od nowa:
 
-1. **Trasy równoległe** — sloty `@products` i `@discounts` w layoucie
-   `/product-list`; panel promocji renderuje się niezależnie od kategorii
-   i produktu (pliki `default.tsx` dla niedopasowanych ścieżek).
-   Slot `@folder` nie jest segmentem URL — nie wpływa na adres.
-2. **Modal obrazu** — Intercepting Routes: kliknięcie obrazka otwiera modal
-   (`@modal/(.)image/[productId]`), odświeżenie tego samego URL pokazuje pełną
-   stronę (`image/[productId]`). Zamknięcie przez `router.back()`; pusty stan
-   slotu po wyjściu zapewnia `@modal/default.tsx`.
-3. **Catch-all w `/catalog`** — porównanie `[...slug]` z parametrami zapytania:
-   kategoria i produkt są częścią ścieżki; sama liczba segmentów jest walidowana
-   wraz ze zgodnością produktu z kategorią; dla samego `/catalog` widoczny
-   jest wykaz kategorii.
+```bash
+docker compose down -v --remove-orphans
+docker compose up -d
+```
 
-## Odpowiedzi na pytania architektoniczne
+**Uwaga:** `docker compose down -v` usuwa wolumen `shopdata`, a wraz z nim dane głównej bazy.
 
-- **Błędny format ID vs brak produktu vs awaria:** błędny format (`abc`, `12abc`,
-  `0`, `01`) odrzuca walidacja przed dostępem do repozytorium → `notFound()`;
-  poprawny, lecz nieistniejący ID zwraca `null` z repozytorium → `notFound()`;
-  nieoczekiwana awaria repozytorium jest wyjątkiem i trafia do `error.tsx` —
-  celowo nie zamieniamy jej na widok braku produktu.
-- **Dlaczego `[id]` nie oznacza automatycznie renderowania przy żądaniu:**
-  obecność parametru trasy i `await params` czyni stronę dynamiczną dopiero
-  w połączeniu z odczytem danych przy renderze; bez `generateStaticParams`
-  strona renderuje się przy żądaniu, ale o tym decyduje konfiguracja, nie sam
-  folder.
-- **Dlaczego walidujemy adres mimo kontrolek:** URL można edytować ręcznie,
-  wkleić z zewnątrz lub wywołać bez interfejsu — formularz GET ogranicza tylko
-  to, co użytkownik kliknie, nie to, co trafi do serwera.
-- **Powtórzony klucz (`?type=gpu&type=cpu`):** `searchParams` przekazuje wtedy
-  tablicę; interpretacja odrzuca ją jako niejednoznaczną i stosuje wartość
-  domyślną z komunikatem, zachowując pozostałe poprawne kryteria.
-- **Filtr w `useState` nie odtwarza widoku:** stan komponentu nie jest częścią
-  adresu — udostępniony link pozbawiony informacji o filtrach pokazuje domyślny
-  widok; dlatego źródłem prawdy jest URL.
-- **Link vs pełne przeładowanie:** `Link` wykonuje miękką nawigację — zachowuje
-  stan aplikacji i pobiera tylko potrzebny payload; pełne przeładowanie
-  odbudowuje całość. Komponent `use client` otrzymuje początkowy HTML z serwera,
-  bo client components są renderowane na serwerze przy pierwszym żądaniu.
+### Konfiguracja połączenia
 
-## Testy i weryfikacja
+Połączenie Prisma z PostgreSQL powinno być skonfigurowane za pomocą zmiennych środowiskowych. Przykładowa konfiguracja lokalna:
 
-Testy jednostkowe interpretacji parametrów (`lib/catalog-params.test.ts`):
-poprawna kombinacja, brak wartości, nieznana wartość, pusty tekst, powtórzony
-klucz; walidacja ID i brak mutowania danych wejściowych.
+```env
+DATABASE_URL="postgresql://shop:shoppass@localhost:5432/shop"
+```
 
-Wyniki sprawdzeń (wersja produkcyjna):
+Dla testów można użyć osobnego adresu:
+
+```env
+TEST_DATABASE_URL="postgresql://shop:shoppass@localhost:5433/shop_test"
+```
+
+Nazwy zmiennych muszą odpowiadać konfiguracji Prisma i skryptom testowym w projekcie. Plików zawierających rzeczywiste hasła nie należy commitować do repozytorium.
+
+### Prisma ORM
+
+Prisma odpowiada za mapowanie modeli na tabele PostgreSQL oraz wykonywanie zapytań do bazy danych.
+
+Typowy cykl pracy obejmuje:
+
+1. Definicję modeli w schemacie Prisma.
+2. Konfigurację połączenia z PostgreSQL.
+3. Utworzenie i zastosowanie migracji.
+4. Wygenerowanie klienta Prisma.
+5. Wykorzystanie klienta w warstwie repozytorium.
+6. Weryfikację działania aplikacji i testów.
+
+Przykładowe polecenia — dostosuj je do wersji Prisma i skryptów zdefiniowanych w `package.json`:
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+### Integracja z aplikacją
+
+Odczyt produktów powinien odbywać się przez warstwę repozytorium korzystającą z Prisma. Strony App Router mogą nadal pozostać komponentami serwerowymi.
+
+Należy zachować założenia z Lab 07:
+
+- filtrowanie i sortowanie katalogu na podstawie parametrów URL;
+- walidację identyfikatorów przed odczytem produktu;
+- rozróżnienie braku produktu od nieoczekiwanego błędu bazy;
+- zachowanie działania tras dynamicznych i obsługi `notFound()`;
+- brak mutowania danych wejściowych w logice interpretacji parametrów.
+
+### Testy i weryfikacja
+
+Po skonfigurowaniu bazy danych należy zweryfikować:
+
+- poprawność połączenia Prisma z PostgreSQL;
+- zastosowanie migracji;
+- odczyt produktów;
+- filtrowanie i sortowanie;
+- obsługę nieistniejących identyfikatorów;
+- obsługę błędów połączenia z bazą;
+- izolację danych testowych od głównej bazy;
+- poprawność lintowania, kontroli TypeScript i kompilacji produkcyjnej.

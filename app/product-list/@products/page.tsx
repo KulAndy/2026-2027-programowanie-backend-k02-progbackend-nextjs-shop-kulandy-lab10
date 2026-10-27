@@ -4,6 +4,7 @@ import { parseCatalogParams } from "@/lib/catalog-params";
 import CatalogControls from "@/app/components/catalog-controls";
 import ProductCatalog from "@/app/components/product-catalog";
 import Link from "next/link";
+import { connection } from "next/server";
 
 export default async function ProductsSlot({
   searchParams,
@@ -11,6 +12,7 @@ export default async function ProductsSlot({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const raw = await searchParams;
+  await connection();
   const criteria = parseCatalogParams(raw);
 
   const products = await getProducts({
