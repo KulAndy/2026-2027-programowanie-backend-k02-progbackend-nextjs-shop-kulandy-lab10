@@ -140,6 +140,7 @@ model Account {
   providerId            String
   accessToken           String?
   refreshToken          String?
+  password                String?
   idToken               String?
   accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
   refreshTokenExpiresAt DateTime? @db.Timestamptz(3)

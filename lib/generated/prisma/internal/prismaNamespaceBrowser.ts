@@ -188,6 +188,7 @@ export const AccountScalarFieldEnum = {
   providerId: 'providerId',
   accessToken: 'accessToken',
   refreshToken: 'refreshToken',
+  password: 'password',
   idToken: 'idToken',
   accessTokenExpiresAt: 'accessTokenExpiresAt',
   refreshTokenExpiresAt: 'refreshTokenExpiresAt',
