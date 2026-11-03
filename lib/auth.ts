@@ -10,6 +10,8 @@ function requireEnv(name: string): string {
 }
 
 export const auth = betterAuth({
+  baseURL: requireEnv("BETTER_AUTH_URL"),
+  secret: requireEnv("BETTER_AUTH_SECRET"),
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -17,8 +19,13 @@ export const auth = betterAuth({
     github: {
       clientId: requireEnv("GITHUB_CLIENT_ID"),
       clientSecret: requireEnv("GITHUB_CLIENT_SECRET"),
+      scope: ["user:email"],
     },
   },
+  trustedOrigins: [
+    "http://localhost:3001",
+    "https://2026-2027-programowanie-backend-k02.vercel.app",
+  ],
   session: {
     cookieCache: {
       enabled: false,

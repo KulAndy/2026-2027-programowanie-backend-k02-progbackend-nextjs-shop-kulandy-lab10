@@ -116,3 +116,46 @@ Po skonfigurowaniu bazy danych należy zweryfikować:
 - obsługę błędów połączenia z bazą;
 - izolację danych testowych od głównej bazy;
 - poprawność lintowania, kontroli TypeScript i kompilacji produkcyjnej.
+
+## Deployment (Vercel)
+
+### Production domain
+
+- Stable domain: https://2026-2027-programowanie-backend-k02.vercel.app
+- SHA wdrożonego commita: <UZUPEŁNIJ po deployu>
+- Data wdrożenia: <UZUPEŁNIJ>
+
+### Zmienne środowiskowe (Production, Vercel → Settings → Environment Variables)
+
+| Variable               | Wartość                                                  |
+| ---------------------- | -------------------------------------------------------- |
+| `DATABASE_URL`         | Prisma Postgres (pooled), `sslmode=verify-full`          |
+| `BETTER_AUTH_URL`      | `https://2026-2027-programowanie-backend-k02.vercel.app` |
+| `BETTER_AUTH_SECRET`   | losowy, ≥32 znaki, inny niż lokalny                      |
+| `GITHUB_CLIENT_ID`     | z **produkcyjnej** OAuth App                             |
+| `GITHUB_CLIENT_SECRET` | z **produkcyjnej** OAuth App                             |
+
+Żadna zmienna nie ma prefiksu `NEXT_PUBLIC_`.
+
+### OAuth GitHub (Production)
+
+- Homepage URL: `https://2026-2027-programowanie-backend-k02.vercel.app`
+- Authorization callback URL: `https://2026-2027-programowanie-backend-k02.vercel.app/api/auth/callback/github`
+
+### Kolejność wdrożenia
+
+1. Testy: `npm ci && npx --no-install prisma generate && npm run lint && npm run test && npm run build`
+2. Migracje: `npx --no-install prisma migrate deploy` (na bazie zdalnej, raz)
+3. Seed: `npx --no-install prisma db seed` (raz, po migracjach)
+4. Publikacja: merge PR `lab10 → main` → Vercel automatycznie buduje Production
+5. Odbiór: scenariusze z Tabeli 7.1 (PDF Lab 10)
+
+### Rollback
+
+- Vercel → Deployments → poprzedni działający deploy → Promote to Production.
+- Uwaga: rollback kodu nie cofa migracji. Sprawdź zgodność kodu ze schematem.
+
+### Ograniczenia
+
+- Preview Deployments wyłączone (Better Auth + cookies wymagają stable domain).
+- Baza Prisma Postgres — darmowy plan ma limity połączeń; runtime używa pooled URL.
