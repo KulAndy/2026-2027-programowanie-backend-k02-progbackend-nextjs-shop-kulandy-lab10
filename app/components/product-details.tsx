@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/products";
+import { AddToCartButton } from "./add-to-cart";
 
 export default function ProductDetails({ product }: { product: Product }) {
   return (
@@ -60,6 +61,12 @@ export default function ProductDetails({ product }: { product: Product }) {
             {product.amount > 0
               ? `Dostępny (${product.amount} szt.)`
               : "Niedostępny"}
+            <div className="mt-4">
+              <AddToCartButton
+                productId={product.id}
+                disabled={product.amount <= 0}
+              />
+            </div>{" "}
           </p>
         </div>
 

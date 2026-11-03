@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import NavLink from "./nav-link";
+import { AuthButtons } from "./auth-buttons";
+import { getCurrentSession } from "@/lib/session";
 
-export default function MainHeader() {
+export default async function MainHeader() {
+  const session = await getCurrentSession();
+
   return (
     <nav className="flex flex-wrap items-center gap-6 px-8 py-6 text-sm">
       <Link href="/" className="shrink-0">
@@ -21,6 +25,7 @@ export default function MainHeader() {
       <NavLink href="/basket">Koszyk</NavLink>
       <NavLink href="/order-history">Historia zamówień</NavLink>
       <NavLink href="/about">O projekcie</NavLink>
+      <AuthButtons userName={session?.user.name ?? null} />
     </nav>
   );
 }
